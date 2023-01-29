@@ -1,6 +1,7 @@
 let apiKey = "bdef71253a2a393dd1af50c62ed2aa19"; //weather API key
 let history = $("#history")
 let today = $("#today")
+let forecast = $("#forecast")
 
 let cities = [] //here we will store the searched cities
 
@@ -16,6 +17,7 @@ function renderCities() {
         let historyElement = $('<button type="submit" class="btn btn-secondary btn-sm"></button>');
         history.append(historyElement)
         historyElement.text(city)
+        cities.innerHTML = "" // this make sure the buttons do not repeat themselves
     }
 }
 
@@ -36,6 +38,7 @@ function storeCities() {
 
 //Function to take the data from the input field and inject it into the API fetch request and export the data
 $("#search-button").on("click", function(event) {
+    $("#5-day").prepend($(`<h3>5-Day Forecast:</h3>`))
     //this IF statement will prevent a invalid response(empty field)
     let noSubmit = $('#search-input').val()
     if (!noSubmit) {
@@ -47,60 +50,54 @@ $("#search-button").on("click", function(event) {
     fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${$("#search-input").val()}&limit=1&appid=${apiKey}`)
     .then(response => response.json())
     .then(cityResult => {
-        console.log(cityResult[0]);
 //second fetch will give the times and weather forecast etc
-        return fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityResult[0].lat}&lon=${cityResult[0].lon}&appid=${apiKey}`)
+        return fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityResult[0].lat}&lon=${cityResult[0].lon}&units=metric&appid=${apiKey}`)
     })
     .then(response => response.json())
     .then(data => {
-        console.log(data)
-        console.log(data.city.coord.lat)
         today.append($(`<div>
-        <h2>${data.city.name} (${moment().format('DD/MM/YYYY')})</h2>
+        <h2>${data.city.name} (${moment().format('DD/MM/YYYY')}) <img src="https://openweathermap.org/img/wn/${data.list[0].weather[0].icon}@2x.png"></h2>
         </div>`))
-        return fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${data.city.coord.lat}&lon=${data.city.coord.lon}&units=metric&appid=${apiKey}`)
-    })
-    .then(response => response.json())
-    .then(weather => {
-        console.log(weather)
+        //this will add the data to the big card 
         today.append($(`
-        <p>Temp: ${weather.main.temp}</p>
-        <p>Wind: ${weather.wind.speed} KPH</p>
-        <p>Humidity: ${weather.main.humidity}%</p>
+        <p>Temp: ${data.list[0].main.temp} °C</p>
+        <p>Wind: ${data.list[0].wind.speed} KPH</p>
+        <p>Humidity: ${data.list[0].main.humidity}%</p>
         `))
+        for(i=1;i<6;i++) {
+            forecast.append(
+                `<div class="col">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">${moment(data.list[i*7].dt, "X").format("DD/MM/YYYY")}</h5>
+                    <img src="https://openweathermap.org/img/wn/${data.list[i*7].weather[0].icon}@2x.png">
+                    <p class="card-text">Temp: ${data.list[i*7].main.temp} °C</p>
+                    <p class="card-text">Wind: ${data.list[i*7].wind.speed} KPH</p>
+                    <p class="card-text">Humidity: ${data.list[i*7].main.humidity}%</p>
+                  </div>
+                </div>
+              </div>`
+            )
+        }
     })
-
-        // <p>Temp: 13.63*C</p>
-        // <p>Wind: 1.7 KPH</p>
-        // <p>Humidity: 84%</p>
-
-    // .then(response => response.json())
-    // .then(data => {
-    //     console.log(data);
-    // })
-
-
+ 
     // Add the cities to the array
     cities.push($("#search-input").val())
+    //Execut the functions
     storeCities()
     renderCities()
 })
 
-function todayData() {
 
-}
+// This click event will reset the localStorage values
+$("#delete-button").on("click", function() {
+    let text;
+    if(confirm("This will delete all the cities you've searched for, are you sure?")){
+        text = "Items deleted successfully"
+        localStorage.clear()
+    } else {
+        text = "You did not delete the items."
+    }
+    
+})
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-//to add a CLEAR ALL ELEMENTS button
