@@ -17,7 +17,6 @@ function renderCities() {
         let historyElement = $('<button type="submit" class="btn btn-secondary btn-sm"></button>');
         history.append(historyElement)
         historyElement.text(city)
-        cities.innerHTML = "" // this make sure the buttons do not repeat themselves
     }
 }
 
@@ -28,17 +27,16 @@ function retrieveData() {
     if(storedCities !== null) {
         cities = storedCities
     }
-
     renderCities()
 }
-//function to store data into the localstorage
+//function to store data into the localStorage
 function storeCities() {
     localStorage.setItem("cities", JSON.stringify(cities));
 }
 
 //Function to take the data from the input field and inject it into the API fetch request and export the data
 $("#search-button").on("click", function(event) {
-    $("#5-day").prepend($(`<h3>5-Day Forecast:</h3>`))
+    resetScreenData()
     //this IF statement will prevent a invalid response(empty field)
     let noSubmit = $('#search-input').val()
     if (!noSubmit) {
@@ -58,12 +56,13 @@ $("#search-button").on("click", function(event) {
         today.append($(`<div>
         <h2>${data.city.name} (${moment().format('DD/MM/YYYY')}) <img src="https://openweathermap.org/img/wn/${data.list[0].weather[0].icon}@2x.png"></h2>
         </div>`))
-        //this will add the data to the big card 
+        //this will generate and add the data to the big card 
         today.append($(`
         <p>Temp: ${data.list[0].main.temp} °C</p>
         <p>Wind: ${data.list[0].wind.speed} KPH</p>
         <p>Humidity: ${data.list[0].main.humidity}%</p>
         `))
+        //this will dynamically generate 5 cards with API data
         for(i=1;i<6;i++) {
             forecast.append(
                 `<div class="col">
@@ -79,17 +78,20 @@ $("#search-button").on("click", function(event) {
               </div>`
             )
         }
+        $("#after-today").append($(`<h3>5-Day Forecast:</h3>`))
+
     })
  
     // Add the cities to the array
     cities.push($("#search-input").val())
-    //Execut the functions
+    //Execute the functions
     storeCities()
     renderCities()
 })
 
 
 // This click event will reset the localStorage values
+//to implement: nice looking alert pop up
 $("#delete-button").on("click", function() {
     let text;
     if(confirm("This will delete all the cities you've searched for, are you sure?")){
@@ -98,6 +100,14 @@ $("#delete-button").on("click", function() {
     } else {
         text = "You did not delete the items."
     }
-    
 })
 
+
+function resetScreenData() {
+    today.text("")
+    forecast.text("")
+    $("#after-today").text("")
+}
+
+//for button functionality: either reload the fetches for TEXT from button
+//either create an object and store the data dynamically as an object when creating the button
