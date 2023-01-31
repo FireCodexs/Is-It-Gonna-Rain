@@ -14,8 +14,8 @@
 
 # Screenshots
 
-## TO ADD
+![Capture](https://user-images.githubusercontent.com/26620001/215903040-97a2deed-bb1f-4747-8562-c5f81c36ba3d.JPG)
 
 # Link to deployed app
 
-## to add
+https://firecodexs.github.io/Is-It-Gonna-Rain/
