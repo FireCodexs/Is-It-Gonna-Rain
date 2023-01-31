@@ -10,11 +10,12 @@ retrieveData()
 
 function renderCities() {
     $("#cities-count").text(cities.length)
-
+    history.text("")
     //Render a new button element for each city
     for(i=0;i<cities.length;i++){
+
         let city = cities[i]
-        let historyElement = $('<button type="submit" class="btn btn-secondary btn-sm"></button>');
+        let historyElement = $(`<button type="submit" data-value=${city} class="btn btn-secondary btn-sm"></button>`);
         history.append(historyElement)
         historyElement.text(city)
     }
@@ -43,16 +44,48 @@ $("#search-button").on("click", function(event) {
         return alert('You need to type a city!');
     }
     event.preventDefault(); //this will prevent the refresh of the page when the  button is clicked
+    cityName = $("#search-input").val()
+    buttonSearch(cityName)
+
+    // Add the cities to the array
+    cities.push($("#search-input").val())
+    //Execute the functions
+    storeCities()
+    renderCities()
+})
+
+//function to retrieve data when pressing a saved city
     
-//first fetch will give the basic geo info
-    fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${$("#search-input").val()}&limit=1&appid=${apiKey}`)
+
+$("#history").on("click", function (event) {
+    buttonSearch($("#history").children(function (event) {
+        event.preventDefault();
+        resetScreenData()
+        console.log($(this).attr("data-value")) 
+}))
+})
+
+    // $("#history").children().each(function () {
+    //         let selector = $(this).attr("data-value")
+    //         console.log(selector)
+    //         selector.on("click", function (event) {
+    //             buttonSearch(selector)
+    //         })
+    // })
+
+
+function buttonSearch(cityName) {
+
+    //first fetch will give the basic geo info
+    fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=${apiKey}`)
     .then(response => response.json())
     .then(cityResult => {
-//second fetch will give the times and weather forecast etc
+        //second fetch will give the times and weather forecast etc
         return fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${cityResult[0].lat}&lon=${cityResult[0].lon}&units=metric&appid=${apiKey}`)
     })
     .then(response => response.json())
     .then(data => {
+        
         today.append($(`<div>
         <h2>${data.city.name} (${moment().format('DD/MM/YYYY')}) <img src="https://openweathermap.org/img/wn/${data.list[0].weather[0].icon}@2x.png"></h2>
         </div>`))
@@ -68,28 +101,21 @@ $("#search-button").on("click", function(event) {
                 `<div class="col">
                 <div class="card">
                   <div class="card-body">
-                    <h5 class="card-title">${moment(data.list[i*7].dt, "X").format("DD/MM/YYYY")}</h5>
+                  <h5 class="card-title">${moment(data.list[i*7].dt, "X").format("DD/MM/YYYY")}</h5>
                     <img src="https://openweathermap.org/img/wn/${data.list[i*7].weather[0].icon}@2x.png">
                     <p class="card-text">Temp: ${data.list[i*7].main.temp} °C</p>
                     <p class="card-text">Wind: ${data.list[i*7].wind.speed} KPH</p>
                     <p class="card-text">Humidity: ${data.list[i*7].main.humidity}%</p>
-                  </div>
-                </div>
+                    </div>
+                    </div>
               </div>`
             )
         }
         $("#after-today").append($(`<h3>5-Day Forecast:</h3>`))
 
     })
- 
-    // Add the cities to the array
-    cities.push($("#search-input").val())
-    //Execute the functions
-    storeCities()
-    renderCities()
-})
-
-
+}
+    
 // This click event will reset the localStorage values
 //to implement: nice looking alert pop up
 $("#delete-button").on("click", function() {
