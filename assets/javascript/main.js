@@ -13,7 +13,6 @@ function renderCities() {
     history.text("")
     //Render a new button element for each city
     for(i=0;i<cities.length;i++){
-
         let city = cities[i]
         let historyElement = $(`<button type="submit" data-value=${city} class="btn btn-secondary btn-sm"></button>`);
         history.append(historyElement)
@@ -56,23 +55,15 @@ $("#search-button").on("click", function(event) {
 
 //function to retrieve data when pressing a saved city
     
-
-$("#history").on("click", function (event) {
-    buttonSearch($("#history").children(function (event) {
-        event.preventDefault();
-        resetScreenData()
-        console.log($(this).attr("data-value")) 
-}))
+$("#history").children().each(function () {
+        let selector = $(this)
+        console.log(selector)
+            selector.on("click", function(event){
+                event.preventDefault();
+                buttonSearch(selector.attr("data-value"))
+                resetScreenData()
+        })
 })
-
-    // $("#history").children().each(function () {
-    //         let selector = $(this).attr("data-value")
-    //         console.log(selector)
-    //         selector.on("click", function (event) {
-    //             buttonSearch(selector)
-    //         })
-    // })
-
 
 function buttonSearch(cityName) {
 
@@ -85,7 +76,6 @@ function buttonSearch(cityName) {
     })
     .then(response => response.json())
     .then(data => {
-        
         today.append($(`<div>
         <h2>${data.city.name} (${moment().format('DD/MM/YYYY')}) <img src="https://openweathermap.org/img/wn/${data.list[0].weather[0].icon}@2x.png"></h2>
         </div>`))
@@ -112,7 +102,6 @@ function buttonSearch(cityName) {
             )
         }
         $("#after-today").append($(`<h3>5-Day Forecast:</h3>`))
-
     })
 }
     
@@ -134,6 +123,3 @@ function resetScreenData() {
     forecast.text("")
     $("#after-today").text("")
 }
-
-//for button functionality: either reload the fetches for TEXT from button
-//either create an object and store the data dynamically as an object when creating the button
